@@ -23,7 +23,7 @@ class Assign:
         def time_is_up(start, time):
             if time == 0:
                 return False
-            return timer() - start >= time
+            return timer() - start >= time - ((time/100) * 30)
 
         def do_assign( w, g ):
             filled = False
