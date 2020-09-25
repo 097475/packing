@@ -101,12 +101,7 @@ class Assign:
                     # if bnb returned a solution (instead of None), save it
                     if tentative_solution:
                         solution = tentative_solution
-                    #print("solution for depth:", limit+1, ":", solution)
             return solution
 
         selected_solution = iterative_deepening_bnb()
-
-        #print(selected_solution[0])
-        #print("---------")
-
         return selected_solution[0]  # Return the gate to dispatch the item in the first car (car[0]).
