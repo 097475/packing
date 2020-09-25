@@ -46,30 +46,52 @@ class Assign:
         # IMPLEMENT THIS ROUTINE
         # Suggestion: Use an iterative-deepening version of DFBnB.
         # Call 'self.estimator.get_giveaway(gates)' for the heuristic estimate of future giveaway.
-        lowest_giveaway = math.inf  # giveaway weight of best solution found so far
-        best_solution = None
-        stack = deque([[None] * len(cars)])  # stack (to ensure LIFO order) initialized with an initial solution
-        # a solution is a list which assigns a gate to each car
-        # initially all cars have no assigned gate
-        while stack:
-            current_solution = stack.popleft() #get the current solution
-            if None in current_solution: #not a full assignment
+        def iterative_deepening_bnb():
+            start = timer()
+            solution = None
+
+            def bnb(current_solution, upper_bound, best_solution, limit, depth, giveaway):
+                if time_is_up(start, time):
+                    return upper_bound, best_solution
                 next_unassigned_var = current_solution.index(None)  # get the first unassigned variable
                 for g in range(len(gates)):
-                    new_solution = current_solution.copy()
-                    new_solution[next_unassigned_var] = g
-                    for i in range(len(new_solution)):
-                        if new_solution[i]:
-                            do_assign(cars[i], new_solution[i])
-                    current_giveaway = self.estimator.get_giveaway(gates)  # get new giveaway using heuristic
-                    if current_giveaway < lowest_giveaway:
-                        stack.appendleft(new_solution)
-            else: # a full assignment
-                for i in range(len(current_solution)):
-                    do_assign(cars[i], current_solution[i])
-                current_giveaway = self.estimator.get_giveaway(gates) #get new giveaway using heuristic
-                if current_giveaway < lowest_giveaway:
-                    lowest_giveaway = current_giveaway
-                    best_solution = current_solution
+                    new_solution = current_solution.copy()  # generate new solution
+                    new_solution[next_unassigned_var] = g  # assign a gate to the unassigned variable
+                    info = do_assign(cars[next_unassigned_var], g)  # update the weight of the gate
+                    giveaway += info[1]
+                    if depth < limit:
+                        if giveaway < upper_bound:
+                            upper_bound, best_solution = bnb(new_solution, upper_bound, best_solution, limit, depth + 1,
+                                                             giveaway)
+                        else:
+                            pass
+                            # print("pruned")
+                    else:
+                        estimate = self.estimator.get_giveaway(gates)
+                        if estimate < upper_bound:
+                            upper_bound, best_solution = estimate, new_solution
+                        else:
+                            pass
+                            # print("pruned")
 
-        return best_solution[0]  # Return the gate to dispatch the item in the first car (car[0]).
+                    undo_assign(cars[next_unassigned_var], g, info)
+                    giveaway -= info[1]
+
+                return upper_bound, best_solution
+
+            for limit in range(len(cars)):
+                if time_is_up(start, time):
+                    return solution or [0]
+                else:
+                    bound, tentative_solution = bnb([None] * len(cars), math.inf, None, limit, 0, 0)
+                    if tentative_solution:
+                        solution = tentative_solution
+                    print("solution for depth:", limit+1, ":", solution)
+            return solution
+
+        selected_solution = iterative_deepening_bnb()
+
+        print(selected_solution)
+        print("---------")
+
+        return selected_solution[0]  # Return the gate to dispatch the item in the first car (car[0]).
