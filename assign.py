@@ -67,7 +67,7 @@ class Assign:
                             pass
                             # print("pruned")
                     else:
-                        estimate = self.estimator.get_giveaway(gates)
+                        estimate = self.estimator.get_giveaway(gates) + giveaway
                         if estimate < upper_bound:
                             upper_bound, best_solution = estimate, new_solution
                         else:
@@ -91,7 +91,7 @@ class Assign:
 
         selected_solution = iterative_deepening_bnb()
 
-        print(selected_solution)
+        print(selected_solution[0])
         print("---------")
 
         return selected_solution[0]  # Return the gate to dispatch the item in the first car (car[0]).
