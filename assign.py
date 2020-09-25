@@ -58,6 +58,9 @@ class Assign:
                 next_unassigned_var = current_solution.index(None)  # get the first unassigned variable
 
                 for g in range(len(gates)):
+                    if time_is_up(start, time):
+                        return upper_bound, best_solution
+
                     new_solution = current_solution.copy()  # generate new solution
                     new_solution[next_unassigned_var] = g  # assign a gate to the unassigned variable
                     info = do_assign(cars[next_unassigned_var], g)  # update the weight of the gate
@@ -70,10 +73,8 @@ class Assign:
                             # go deeper and assign next variable
                             upper_bound, best_solution = bnb(new_solution, upper_bound, best_solution, limit, depth + 1,
                                                              giveaway)
-                        # else only for debug
-                        else:
-                            pass
-                            # print("pruned")
+                            if time_is_up(start, time):
+                                return upper_bound, best_solution
                     # we are at max depth, we have to evaluate this assignment
                     else:
                         # we evaluate calculating the estimated giveaway plus the actual giveaway
@@ -82,10 +83,6 @@ class Assign:
                         # and this solution becomes the best solution
                         if estimate < upper_bound:
                             upper_bound, best_solution = estimate, new_solution
-                        # only for debug
-                        else:
-                            pass
-                            # print("pruned")
 
                     # reset assignment and giveaway when trying a new value
                     undo_assign(cars[next_unassigned_var], g, info)
