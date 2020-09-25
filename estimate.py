@@ -47,7 +47,7 @@ class InformedEstimator(Estimator):
             next_weight_samples = random.normal(self.avg, self.std, open_gates)
             sorted_samples = sorted(next_weight_samples, reverse=True)
 
-            for i in range(open_gates):
+            for i in range(len(sorted_gates)):
                 sorted_gates[i] += sorted_samples[i]
                 if sorted_gates[i] >= self.capacity:
                     giveaway += sorted_gates[i] - self.capacity
